@@ -1,125 +1,107 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'domain/entities/Product.dart';
+import 'domain/usecases/view_all_products.dart';
+import 'domain/usecases/view_product.dart';
+import 'domain/usecases/create_product.dart';
+import 'domain/usecases/update_product.dart';
+import 'domain/usecases/delete_product.dart';
 
 void main() {
-  runApp(const MyApp());
-}
+  // Initialize product list
+  final products = <Product>[];
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // Initialize use cases
+  final viewAllProducts = ViewAllProductsUsecase(products);
+  final viewProduct = ViewProductUsecase(products);
+  final createProduct = CreateProductUsecase(products);
+  final updateProduct = UpdateProductUsecase(products);
+  final deleteProduct = DeleteProductUsecase(products);
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+  while (true) {
+    print('\n1. View All Products');
+    print('2. View Product');
+    print('3. Create Product');
+    print('4. Update Product');
+    print('5. Delete Product');
+    print('6. Exit');
+    stdout.write('Choose an option: ');
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+    String? choice = stdin.readLineSync();
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+    switch (choice) {
+      case '1': // View all products
+        viewAllProducts(null).forEach(print);
+        break;
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+      case '2': // View a specific product
+        stdout.write('Enter product ID: ');
+        int? id = int.tryParse(stdin.readLineSync() ?? '');
+        if (id != null) {
+          print(viewProduct(id) ?? 'Product not found.');
+        } else {
+          print('Invalid ID.');
+        }
+        break;
 
-  final String title;
+      case '3': // Create a new product
+        stdout.write('Enter product ID: ');
+        int id = int.parse(stdin.readLineSync()!);
+        stdout.write('Enter product name: ');
+        String name = stdin.readLineSync()!;
+        stdout.write('Enter product description: ');
+        String description = stdin.readLineSync()!;
+        stdout.write('Enter product image URL: ');
+        String imageUrl = stdin.readLineSync()!;
+        stdout.write('Enter product price: ');
+        double price = double.parse(stdin.readLineSync()!);
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+        createProduct(Product(
+          id: id,
+          name: name,
+          description: description,
+          imageUrl: imageUrl,
+          price: price,
+        ));
+        break;
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+      case '4': // Update an existing product
+        stdout.write('Enter product ID to update: ');
+        int id = int.parse(stdin.readLineSync()!);
+        stdout.write('Enter updated product name: ');
+        String name = stdin.readLineSync()!;
+        stdout.write('Enter updated product description: ');
+        String description = stdin.readLineSync()!;
+        stdout.write('Enter updated product image URL: ');
+        String imageUrl = stdin.readLineSync()!;
+        stdout.write('Enter updated product price: ');
+        double price = double.parse(stdin.readLineSync()!);
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+        updateProduct(Product(
+          id: id,
+          name: name,
+          description: description,
+          imageUrl: imageUrl,
+          price: price,
+        ));
+        break;
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+      case '5': // Delete a product
+        stdout.write('Enter product ID to delete: ');
+        int? id = int.tryParse(stdin.readLineSync() ?? '');
+        if (id != null) {
+          deleteProduct(id);
+        } else {
+          print('Invalid ID.');
+        }
+        break;
+
+      case '6': // Exit the application
+        print('Exiting...');
+        return;
+
+      default:
+        print('Invalid option. Please try again.');
+        break;
+    }
   }
 }
